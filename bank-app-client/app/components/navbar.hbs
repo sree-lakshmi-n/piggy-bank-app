@@ -1,0 +1,18 @@
+<nav class="nav flex-center-v">
+  <Logo />
+  <ul class="nav-list flex-center-v">
+    {{#each @model as |navitem|}}
+      <LinkTo
+        @route="customer-portal.{{navitem}}"
+        onclick={{action this.handleNavItemClick}}
+        class="nav-list-link"
+      >
+        <li
+          class="nav-list-item
+            {{navitem}}
+            {{if (eq navitem 'profile') 'active-nav' ''}}"
+        >{{navitem}}</li>
+      </LinkTo>
+    {{/each}}
+  </ul>
+</nav>
