@@ -1,0 +1,41 @@
+<Logo />
+<main class="container flex-col-center">
+  <h2>Login</h2>
+  <div class="form flex-col-center">
+    <div class="form-input flex-center-v">
+      <label for="custId">Customer ID</label>
+      <input
+        type="text"
+        name="custId"
+        class="input-cust-id"
+        {{on "input" (fn this.validateFormElements "custid")}}
+        required
+      />
+    </div>
+    {{#if (eq this.isCustIdValid false)}}
+      <span class="error-message">Customer ID should be a numeral</span>
+    {{/if}}
+    <div class="form-input flex-center-v">
+      <label for="password">Password</label>
+      <input
+        type="password"
+        name="password"
+        class="input-pwd"
+        {{on "input" (fn this.validateFormElements "password")}}
+        required
+      />
+    </div>
+    {{#if (eq this.isPasswordValid false)}}
+      <span class="error-message">Invalid Password</span>
+    {{/if}}
+
+    <button
+      type="button"
+      class="button"
+      {{on "click" this.loginCustomer}}
+    >Login</button>
+    <p>New User?
+      <LinkTo @route="register" class="link">Register</LinkTo>
+    </p>
+  </div>
+</main>
