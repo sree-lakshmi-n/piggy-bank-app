@@ -1,0 +1,84 @@
+<Logo />
+<main class="container flex-col-center">
+  <h2>Register</h2>
+  <form class="form flex-col-center">
+    <div class="form-input flex-center-v">
+      <label for="accountname">Name</label>
+      <input
+        type="text"
+        name="accountname"
+        class="input-account-name"
+        {{on "input" (fn this.validateFormElements "name")}}
+        required
+      />
+    </div>
+    {{#if (eq this.isNameValid false)}}
+      <span class="error-message">Name should not contain numerals or special
+        characters except space</span>
+    {{/if}}
+    <div class="form-input flex-center-v">
+      <label for="email">Email ID</label>
+      <input
+        type="text"
+        name="email"
+        class="input-email"
+        {{on "input" (fn this.validateFormElements "email")}}
+        required
+      />
+    </div>
+    {{#if (eq this.isEmailValid false)}}
+      <span class="error-message">Invalid Email ID</span>
+    {{/if}}
+    <div class="form-input flex-center-v">
+      <label for="mobileNum">Mobile No.</label>
+      <input
+        type="text"
+        name="mobileNum"
+        class="input-mobile-num"
+        {{on "input" (fn this.validateFormElements "mobileNum")}}
+        required
+      />
+    </div>
+    {{#if (eq this.isMobileNumValid false)}}
+      <span class="error-message">Invalid Mobile Number</span>
+    {{/if}}
+    <div class="form-input flex-center-v">
+      <label for="upi">UPI ID</label>
+      <input
+        type="text"
+        name="upi"
+        class="input-upi"
+        placeholder="janedoe@okpiggybank"
+        {{on "input" (fn this.validateFormElements "upiId")}}
+        required
+      />
+    </div>
+    {{#if (eq this.isUpiIdValid false)}}
+      <span class="error-message">Invalid UPI ID. UPI should always end with
+        @okpiggybank</span>
+    {{/if}}
+    <div class="form-input flex-center-v">
+      <label for="password">Password</label>
+      <input
+        type="password"
+        name="password"
+        class="input-password"
+        {{on "input" (fn this.validateFormElements "password")}}
+      />
+    </div>
+    {{#if (eq this.isPasswordValid false)}}
+      <span class="error-message">Password must contain at least one lowercase
+        letter, one uppercase letter, one special character, one digit, and must
+        be at least 8 characters long.</span>
+    {{/if}}
+
+    <button
+      type="submit"
+      class="button"
+      {{on "click" this.registerCustomer}}
+    >Register</button>
+    <p>Already Registered?
+      <LinkTo @route="index" class="link">Login</LinkTo>
+    </p>
+  </form>
+</main>
