@@ -1,0 +1,37 @@
+<section class="section section-edit-contact flex-center"><div
+    class="form flex-col-center"
+  >
+    <h2 class="heading-secondary">Edit Contact </h2>
+    <div class="form-input flex-center-v">
+      <label for="email">Email</label>
+      <input
+        type="text"
+        name="amount"
+        class="input-email"
+        {{on "input" (fn this.validateFormElements "email")}}
+        required
+      />
+    </div>
+    {{#if (eq this.isEmailValid false)}}
+      <span class="error-message">Invalid Email ID</span>
+    {{/if}}
+    <div class="form-input flex-center-v">
+      <label for="mobileNum">Mobile No.</label>
+      <input
+        type="text"
+        name="mobileNum"
+        class="input-mobile-num"
+        {{on "input" (fn this.validateFormElements "mobileNum")}}
+        required
+      />
+    </div>
+    {{#if (eq this.isMobileNumValid false)}}
+      <span class="error-message">Invalid Mobile Number</span>
+    {{/if}}
+    <button
+      type="button"
+      class="button"
+      {{on "click" this.editContactDetails}}
+    >Edit Profile</button>
+  </div>
+</section>
