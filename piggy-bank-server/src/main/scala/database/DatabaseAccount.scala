@@ -9,7 +9,6 @@ object DatabaseAccount:
   val maxTransactionLimit: Double = 150000.0
 
 
-
   def checkBalance(connection: Connection, account_num: Int): Double =
     val query = "select * from account where account_num=?"
     val stmt: PreparedStatement = connection.prepareStatement(query)
@@ -24,8 +23,8 @@ object DatabaseAccount:
       -1.0
 
   def addDatatoTransaction(connection: Connection, account_num: Int, amount: Double, transactType: String,
-                           transactStatus: String): Int =
-    val query = "insert into transaction (transaction_type,amount,date,account_num,status) values(?,?,?,?,?) returning transaction_id"
+                           transactStatus: String, statusId: Int): Int =
+    val query = "insert into transaction (transaction_type,amount,date,account_num,status,status_id) values(?,?,?,?,?,?) returning transaction_id"
     val stmt = connection.prepareStatement(query)
     val currentDate = Date.valueOf(LocalDate.now())
     val typeObject = new PGobject
@@ -39,6 +38,7 @@ object DatabaseAccount:
     stmt.setDate(3, currentDate)
     stmt.setInt(4, account_num)
     stmt.setObject(5, statusObject)
+    stmt.setObject(6, statusId)
     var rs: ResultSet = stmt.executeQuery()
     var transactionId = -1
     if (rs.next()) {
@@ -47,11 +47,12 @@ object DatabaseAccount:
     }
     transactionId
 
-  def addDatatoTransfer(connection: Connection, recipient_account_num: Int, transaction_id: Int): Unit =
-    val query = "insert into transfer (recipient_account_num,transaction_id) values(?,?) returning transaction_id"
+  def addDatatoTransfer(connection: Connection, recipient_account_num: Int, transaction_id: Int, sender_account_num: Int): Unit =
+    val query = "insert into transfer (recipient_account_num,transaction_id,sender_account_num) values(?,?,?) returning transaction_id"
     val stmt = connection.prepareStatement(query)
     stmt.setInt(1, recipient_account_num)
     stmt.setInt(2, transaction_id)
+    stmt.setInt(3, sender_account_num)
     stmt.execute()
     println(s"Inserted row(s) into transfer")
 
@@ -71,7 +72,7 @@ object DatabaseAccount:
     if (rs.next()) then
       val balance = rs.getDouble("balance")
       println(balance + amount)
-      val transactionId = addDatatoTransaction(connection, account_num, amount, "deposit", "success")
+      val transactionId = addDatatoTransaction(connection, account_num, amount, "deposit", "success",1)
       updateAccountBalance(connection, account_num, (balance + amount))
       true
     else
@@ -86,15 +87,15 @@ object DatabaseAccount:
     if (rs.next()) then
       val balance = rs.getDouble("balance")
       if balance < amount then
-        val transactionId = addDatatoTransaction(connection, account_num, amount, "withdrawal", "fail")
-        (false, "No sufficient balance")
+        val transactionId = addDatatoTransaction(connection, account_num, amount, "withdrawal", "fail",2)
+        (false, getReason(connection,2))
       else if (getTodayTransactedAmount(connection, account_num) + amount) >= maxTransactionLimit then
-        val transactionId = addDatatoTransaction(connection, account_num, amount, "withdrawal", "fail")
-        (false, "Transaction limit reached")
+        val transactionId = addDatatoTransaction(connection, account_num, amount, "withdrawal", "fail",3)
+        (false, getReason(connection,3))
       else
-        val transactionId = addDatatoTransaction(connection, account_num, amount, "withdrawal", "success")
+        val transactionId = addDatatoTransaction(connection, account_num, amount, "withdrawal", "success",1)
         updateAccountBalance(connection, account_num, (balance - amount))
-        (true, "Amount withdrawn successfully")
+        (true, getReason(connection,1))
     else
       (false, "Account not found")
 
@@ -109,11 +110,11 @@ object DatabaseAccount:
     if (rs.next()) then
       val balance = rs.getDouble("balance")
       if balance < amount then
-        transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "fail")
-        (false,"No sufficient balance")
+        transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "fail",2)
+        (false, getReason(connection,2))
       else if (getTodayTransactedAmount(connection, account_num) + amount) >= maxTransactionLimit then
-        val transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "fail")
-        (false,"Transaction limit reached")
+        val transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "fail",3)
+        (false, getReason(connection,3))
       else
         query = "select * from account where account_num=?"
         stmt = connection.prepareStatement(query)
@@ -122,16 +123,26 @@ object DatabaseAccount:
         rs = stmt.executeQuery()
         if (rs.next()) then
           val recipientBalance = rs.getDouble("balance")
-          transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "success")
-          addDatatoTransfer(connection, recipient_account_num, transactionId)
+          transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "success",1)
+          addDatatoTransfer(connection, recipient_account_num, transactionId, account_num)
           updateAccountBalance(connection, account_num, balance - amount)
           updateAccountBalance(connection, recipient_account_num, recipientBalance + amount)
-          (true,"Amount transferred successfully")
+          (true, getReason(connection,1))
         else
-          transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "fail")
-          (false, "Recipient UPI id invalid")
+          transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "fail",4)
+          (false, getReason(connection,4))
     else
-      (false,"Account not found")
+      (false, getReason(connection,5))
+
+  def getReason(connection: Connection, statusId: Int): String =
+    var query = "select * from status where status_id=?"
+    var stmt: PreparedStatement = connection.prepareStatement(query)
+    stmt.setInt(1, statusId)
+    var rs: ResultSet = stmt.executeQuery()
+    var reason = ""
+    if (rs.next()) then
+      reason = rs.getString("reason")
+    reason
 
   def getUpiId(connection: Connection, accountNum: Int): String =
     var query = "select * from account where account_num=?"
@@ -163,7 +174,7 @@ object DatabaseAccount:
       accountNum = rs.getInt("account_num")
     accountNum
 
-  def getAccountDetails(connection: Connection, upiId: String): (Int,Int,Double) =
+  def getAccountDetails(connection: Connection, upiId: String): (Int, Int, Double) =
     var query = "select * from account where upi_id=?"
     var stmt: PreparedStatement = connection.prepareStatement(query)
     stmt.setString(1, upiId)
@@ -175,7 +186,7 @@ object DatabaseAccount:
       accountNum = rs.getInt("account_num")
       custId = rs.getInt("cust_id")
       balance = rs.getInt("balance")
-    (accountNum,custId,balance)
+    (accountNum, custId, balance)
 
   def getTodayTransactedAmount(connection: Connection, account_num: Int): Double =
     val query = "select sum(amount) as total from transaction where (transaction_type=? or transaction_type=?)  and account_num=? and status=? and date=CURRENT_DATE"
