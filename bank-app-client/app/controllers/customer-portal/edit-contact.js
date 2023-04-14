@@ -51,7 +51,7 @@ export default class CustomerPortalEditContactController extends Controller {
         const json = await response.json();
         alert(json.message);
         this.auth.email = email;
-        this.auth.mobilenum = mobilenum;
+        this.auth.phonenum = mobilenum;
         element.querySelector('.input-email ').value = '';
         element.querySelector('.input-mobile-num').value = '';
       } else {
