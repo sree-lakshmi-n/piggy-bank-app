@@ -72,7 +72,7 @@ object DatabaseAccount:
     if (rs.next()) then
       val balance = rs.getDouble("balance")
       println(balance + amount)
-      val transactionId = addDatatoTransaction(connection, account_num, amount, "deposit", "success",1)
+      val transactionId = addDatatoTransaction(connection, account_num, amount, "deposit", "success", 1)
       updateAccountBalance(connection, account_num, (balance + amount))
       true
     else
@@ -87,15 +87,15 @@ object DatabaseAccount:
     if (rs.next()) then
       val balance = rs.getDouble("balance")
       if balance < amount then
-        val transactionId = addDatatoTransaction(connection, account_num, amount, "withdrawal", "fail",2)
-        (false, getReason(connection,2))
+        val transactionId = addDatatoTransaction(connection, account_num, amount, "withdrawal", "fail", 2)
+        (false, getReason(connection, 2))
       else if (getTodayTransactedAmount(connection, account_num) + amount) >= maxTransactionLimit then
-        val transactionId = addDatatoTransaction(connection, account_num, amount, "withdrawal", "fail",3)
-        (false, getReason(connection,3))
+        val transactionId = addDatatoTransaction(connection, account_num, amount, "withdrawal", "fail", 3)
+        (false, getReason(connection, 3))
       else
-        val transactionId = addDatatoTransaction(connection, account_num, amount, "withdrawal", "success",1)
+        val transactionId = addDatatoTransaction(connection, account_num, amount, "withdrawal", "success", 1)
         updateAccountBalance(connection, account_num, (balance - amount))
-        (true, getReason(connection,1))
+        (true, getReason(connection, 1))
     else
       (false, "Account not found")
 
@@ -110,11 +110,11 @@ object DatabaseAccount:
     if (rs.next()) then
       val balance = rs.getDouble("balance")
       if balance < amount then
-        transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "fail",2)
-        (false, getReason(connection,2))
+        transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "fail", 2)
+        (false, getReason(connection, 2))
       else if (getTodayTransactedAmount(connection, account_num) + amount) >= maxTransactionLimit then
-        val transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "fail",3)
-        (false, getReason(connection,3))
+        val transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "fail", 3)
+        (false, getReason(connection, 3))
       else
         query = "select * from account where account_num=?"
         stmt = connection.prepareStatement(query)
@@ -123,16 +123,16 @@ object DatabaseAccount:
         rs = stmt.executeQuery()
         if (rs.next()) then
           val recipientBalance = rs.getDouble("balance")
-          transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "success",1)
+          transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "success", 1)
           addDatatoTransfer(connection, recipient_account_num, transactionId, account_num)
           updateAccountBalance(connection, account_num, balance - amount)
           updateAccountBalance(connection, recipient_account_num, recipientBalance + amount)
-          (true, getReason(connection,1))
+          (true, getReason(connection, 1))
         else
-          transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "fail",4)
-          (false, getReason(connection,4))
+          transactionId = addDatatoTransaction(connection, account_num, amount, "transfer", "fail", 4)
+          (false, getReason(connection, 4))
     else
-      (false, getReason(connection,5))
+      (false, getReason(connection, 5))
 
   def getReason(connection: Connection, statusId: Int): String =
     var query = "select * from status where status_id=?"
@@ -189,7 +189,8 @@ object DatabaseAccount:
     (accountNum, custId, balance)
 
   def getTodayTransactedAmount(connection: Connection, account_num: Int): Double =
-    val query = "select sum(amount) as total from transaction where (transaction_type=? or transaction_type=?)  and account_num=? and status=? and date=CURRENT_DATE"
+    val query = "select sum(amount) as total from transaction where (transaction_type=? or" +
+      " transaction_type=?)  and account_num=? and status=? and date=CURRENT_DATE"
     val stmt: PreparedStatement = connection.prepareStatement(query)
     val withdrawObject = new PGobject
     withdrawObject.setType("transaction_type_enum")
@@ -210,5 +211,41 @@ object DatabaseAccount:
     else
       0.0
 
+  def getTransactionTable(connection: Connection, account_num: Int): String =
+    val query = "select transaction.transaction_id,transaction_type,amount,date,account_num, " +
+      "recipient_account_num from transaction left outer join transfer on " +
+      "transaction.transaction_id = transfer.transaction_id where status = ? and " +
+      "(account_num=? or recipient_account_num=?)"
+    val stmt: PreparedStatement = connection.prepareStatement(query)
+    val statusObject = new PGobject
+    statusObject.setType("transaction_status_enum")
+    statusObject.setValue("success")
+    stmt.setObject(1, statusObject)
+    stmt.setInt(2, account_num)
+    stmt.setInt(3, account_num)
+    var rs: ResultSet = stmt.executeQuery()
+    var transactionMap = Map[Int, Map[String, Any]]()
+    var jsonString=""
+    while (rs.next())
+    do
+      val transactionId = rs.getInt("transaction_id")
+      println(transactionId)
+      val transactionType = rs.getString("transaction_type")
+      val transactionDate = rs.getString("date")
+      val amount = rs.getDouble("amount")
+      val accountNum = rs.getInt("account_num")
+      val recipientAccountNum = rs.getInt("recipient_account_num")
+      val transactionDetails = Map("date" -> transactionDate, "amount" -> amount, "transactionType" -> transactionType, "accountNum" -> accountNum, "recipientAccountNum" -> recipientAccountNum)
+      transactionMap += (transactionId -> transactionDetails)
+      val jsonObjects = transactionMap.map { case (transactionId, transactionDetails) =>
+        val jsonDetails = transactionDetails.map { case (key, value) =>
+          s""""$key": "$value""""
+        }
+        s"""{"transactionId": "$transactionId", ${jsonDetails.mkString(",")}}"""
+      }
+      jsonString = s"[${jsonObjects.mkString(",")}]"
+      println(transactionMap)
+      println(jsonString)
+    jsonString
 
 
