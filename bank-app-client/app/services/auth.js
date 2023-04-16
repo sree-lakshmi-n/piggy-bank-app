@@ -11,6 +11,7 @@ export default class AuthService extends Service {
   name = null;
   email = null;
   phonenum = null;
+  transactions = null;
 
   @action async login(custId, password) {
     console.log(custId, password);
@@ -33,6 +34,7 @@ export default class AuthService extends Service {
       this.upiId = json.message.split('+')[2];
       console.log(json.message.split('+')[0]);
       await this.getCustomerInfo();
+      await this.getTransactionTable();
       this.router.transitionTo('customer-portal.profile');
     } else {
       alert('Invalid username or password');
@@ -56,6 +58,10 @@ export default class AuthService extends Service {
       this.currentCustId = null;
       this.accountNum = null;
       this.upiId = null;
+      this.name = null;
+      this.email = null;
+      this.phonenum = null;
+      this.transactions = null;
       this.router.transitionTo('index');
     } else {
       alert('Invalid session');
@@ -81,6 +87,31 @@ export default class AuthService extends Service {
       this.email = credentials[1].split(':')[1];
       this.phonenum = credentials[2].split(':')[1];
       console.log(this.name, this.email, this.phonenum);
+    } else {
+      const json = await response.json();
+      console.log(json);
+    }
+  }
+  @action async getTransactionTable() {
+    console.log('transaction table');
+    const response = await fetch('http://localhost:8000/transactions', {
+      method: 'POST',
+      headers: {
+        accountNum: this.accountNum,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    });
+    if (response.ok) {
+      const json = await response.json();
+      console.log(json);
+      if (json.message != '') {
+        this.transactions = JSON.parse(json.message).sort(
+          (a, b) => b.transactionId - a.transactionId
+        );
+      } else {
+        this.transactions = '';
+      }
     } else {
       const json = await response.json();
       console.log(json);
