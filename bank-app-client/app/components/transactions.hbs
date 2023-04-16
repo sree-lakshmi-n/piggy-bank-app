@@ -1,0 +1,9 @@
+<section class="section section-transactions flex-col-center-h">
+  <h2 class="heading-secondary">Transactions</h2>
+  {{#if (gt this.auth.transactions.length 0)}}
+    <TransactionTable />
+  {{else}}
+    <p class="transactions-none-alert">No transactions to show</p>
+  {{/if}}
+
+</section>
