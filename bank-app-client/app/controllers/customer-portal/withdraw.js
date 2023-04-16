@@ -27,7 +27,7 @@ export default class CustomerPortalDepositController extends Controller {
     const element = event.target.closest('.form');
     let amount = element.querySelector('.input-amount').value;
     console.log(`${custId} ${amount} ${accountNum}`);
-    if (this.isAmountValid && amount != null) {
+    if (this.isAmountValid && parseInt(amount) > 0) {
       const response = await fetch('http://localhost:8000/withdraw', {
         method: 'POST',
         headers: {
@@ -42,12 +42,13 @@ export default class CustomerPortalDepositController extends Controller {
         const json = await response.json();
         alert(json.message);
         element.querySelector('.input-amount').value = '';
+        await this.auth.getTransactionTable();
       } else {
         const json = await response.json();
         alert(json.message);
       }
     } else {
-      console.log('Enter valid data');
+      alert('Enter valid data');
     }
   }
 }
