@@ -61,11 +61,11 @@ export default class RegisterController extends Controller {
       this.isMobileNumValid &&
       this.isUpiIdValid &&
       this.isPasswordValid &&
-      email != null &&
-      mobileNum != null &&
-      upiid != null &&
-      password != null &&
-      accountName != null
+      email != '' &&
+      mobileNum != '' &&
+      upiid != '' &&
+      password != '' &&
+      accountName != ''
     ) {
       fetch('http://localhost:8000/register', {
         method: 'POST',
