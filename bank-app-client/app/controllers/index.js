@@ -35,8 +35,8 @@ export default class IndexController extends Controller {
     if (
       this.isCustIdValid &&
       this.isPasswordValid &&
-      custId != null &&
-      password != null
+      custId != '' &&
+      password != ''
     ) {
       this.auth.login(custId, password);
     } else {
