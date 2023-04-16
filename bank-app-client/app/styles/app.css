@@ -48,6 +48,10 @@ input {
   border: none;
   font-size: inherit;
 }
+label,
+input::placeholder {
+  font-weight: var(--font-wt-thin);
+}
 table {
   text-transform: capitalize;
   border-collapse: collapse;
