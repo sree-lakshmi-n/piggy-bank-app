@@ -292,9 +292,33 @@ input[type="radio"]:checked + label:before {
 .transaction-filters {
   font-weight: var(--font-wt-thin);
   margin-bottom: 3.6rem;
+  justify-content: space-between;
 }
-.transaction-type-filters {
+.transaction-type-filter {
   gap: 2.4rem;
+}
+.transaction-entries-num-filter {
+  gap: 0.8rem;
+}
+.transaction-filters input[type="number"],
+.transaction-filters input[type="date"] {
+  border: 1px solid var(--dark-gray);
+  border-radius: 4px;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -ms-border-radius: 4px;
+  -o-border-radius: 4px;
+  padding: 0 0.4rem;
+  color: inherit;
+}
+.transaction-filters input[type="date"] {
+  font-weight: inherit;
+}
+.transaction-date-filter {
+  gap: 0.8rem;
+}
+.transaction-date-filter input:not(:last-child) {
+  margin-right: 2.4rem;
 }
 
 /* REUSABLE CLASSES */
