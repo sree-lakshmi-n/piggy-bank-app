@@ -5,17 +5,20 @@
         alt="Bank Logo"
         class="logo-img"
       /></div>
-    <div class="profile-info flex-col">
+    <div class="profile-info-wrapper flex-col">
       <p class="account-holder-name">{{this.name}}</p>
-      <p>Account Number:
+      <p class="profile-info">Account Number:
         <span class="account-num">{{this.accountNum}}</span></p>
-      <p>Customer ID:
+      <p class="profile-info">Customer ID:
         <span class="account-num">{{this.custId}}</span></p>
-      <p>UPI ID: <span class="account-upi-id">{{this.upiid}}</span></p>
-      <p>Email: <span class="account-email">{{this.email}}</span></p>
-      <p>Phone num: <span class="account-phonenum">{{this.phonenum}}</span></p>
+      <p class="profile-info">UPI ID:
+        <span class="account-upi-id">{{this.upiid}}</span></p>
+      <p class="profile-info">Email:
+        <span class="account-email">{{this.email}}</span></p>
+      <p class="profile-info">Phone num:
+        <span class="account-phonenum">{{this.phonenum}}</span></p>
       {{#if this.isBalanceShown}}
-        <p>Balance:
+        <p class="profile-info">Balance:
           <span class="account-balance">{{this.balance}} Rs.</span></p>
         <button
           class="button"
