@@ -1,0 +1,63 @@
+<div class="transaction-filters">
+  <div class="transaction-type-filters flex-center-v">
+    {{#each this.transactionTypes as |type index|}}
+      <div>
+
+        <input
+          type="radio"
+          id="option{{index}}"
+          name="options"
+          value="{{type}}"
+          checked={{if (eq index 0) true false}}
+          {{on "click" this.handleTypeFilter}}
+        />
+        <label for="option{{index}}">{{type}}</label>
+      </div>
+    {{/each}}
+  </div>
+</div>
+{{#if (gt this.transactions.length 0)}}
+  <table class="transaction-table">
+    <thead>
+      <tr>
+        <th>Transaction ID</th>
+        <th>Type</th>
+        <th>Date</th>
+        <th>Sender Account No.</th>
+        <th>Recipient Account No.</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each this.transactions as |transaction|}}
+        <tr>
+          <td>{{transaction.transactionId}}</td>
+          <td>{{transaction.transactionType}}</td>
+          <td>{{transaction.date}}</td>
+          <td>{{transaction.accountNum}}</td>
+          <td>
+            {{#if (gt transaction.recipientAccountNum 0)}}
+              {{transaction.recipientAccountNum}}
+            {{else}}
+              -
+            {{/if}}
+          </td>
+          <td
+            class="amount
+              {{if
+                (eq transaction.transactionType 'deposit')
+                'text-green'
+                (if
+                  (eq transaction.recipientAccountNum this.auth.accountNum)
+                  'text-green'
+                  'text-red'
+                )
+              }}"
+          >{{transaction.amount}}</td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+{{else}}
+  <p class="transactions-none-alert">No transactions to show</p>
+{{/if}}
