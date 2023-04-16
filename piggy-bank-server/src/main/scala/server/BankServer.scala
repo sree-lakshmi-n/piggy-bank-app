@@ -45,6 +45,7 @@ object RestApi:
       server.createContext("/withdraw", WithdrawHandler(connection))
       server.createContext("/transfer", TransferHandler(connection))
       server.createContext("/custid", CustIdHandler(connection))
+      server.createContext("/transactions", TransactionTableHandler(connection))
       server.start()
       println("Server running on port 8000")
     catch
@@ -391,6 +392,30 @@ case class CustIdHandler(connection: Connection) extends HttpHandler :
       response = "Method not allowed"
       code = 405
     val responseObject = ResponseObject(code, response)
+    val json = responseObject.asJson.toString()
+    t.getResponseHeaders().add("Content-Type", "application/json; charset=UTF-8")
+    t.sendResponseHeaders(code, json.getBytes(StandardCharsets.UTF_8).length)
+    val os = t.getResponseBody
+    os.write(json.getBytes(StandardCharsets.UTF_8))
+    os.close()
+    t.close()
+
+case class TransactionTableHandler(connection: Connection) extends HttpHandler :
+  def handle(t: HttpExchange): Unit =
+    var code = 400
+    t.getResponseHeaders().set("Access-Control-Allow-Origin", "*")
+    val httpMethod = t.getRequestMethod()
+    if (httpMethod.equalsIgnoreCase("OPTIONS")) then
+      t.getResponseHeaders().set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
+      t.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type, Authorization,accountNum")
+      t.sendResponseHeaders(200, -1)
+
+    val headers = t.getRequestHeaders.asScala.toMap
+    val accountNum = Integer.parseInt(headers.get("Accountnum").flatMap(_.asScala.headOption).get)
+    val response = getTransactionTable(connection, accountNum)
+    code = 200
+    println(response)
+    val responseObject = ResponseObject(code, response.toString())
     val json = responseObject.asJson.toString()
     t.getResponseHeaders().add("Content-Type", "application/json; charset=UTF-8")
     t.sendResponseHeaders(code, json.getBytes(StandardCharsets.UTF_8).length)
