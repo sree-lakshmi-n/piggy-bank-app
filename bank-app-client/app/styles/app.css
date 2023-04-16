@@ -1,5 +1,7 @@
 @import url(https://fonts.googleapis.com/css?family=Lato:300,400,600,700);
 
+/* GENERAL STYLING */
+
 :root {
   --font-wt-thin: 300;
   --font-wt-regular: 400;
@@ -11,10 +13,11 @@
   --light-gray: #f6f6f6;
   --gray: #f9f9f9;
   --blue: #016aba;
-  --soft-blue: #677ae4;
+  --soft-blue: #cce1f1;
   --dark-blue: #05526a;
   --light-red: #e46855;
   --dark-gray: #262626;
+  --green: #28b097;
   --black-alpha: rgba(0, 0, 0, 0.05);
 }
 
@@ -34,6 +37,9 @@ body {
   background-color: var(--very-light-gray);
   color: var(--dark-gray);
 }
+
+/* ELEMENTS STYLING */
+
 button,
 input {
   background: transparent;
@@ -42,12 +48,64 @@ input {
   border: none;
   font-size: inherit;
 }
+table {
+  text-transform: capitalize;
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 2rem;
+  font-weight: var(--font-wt-thin);
+}
 
-/* Reusable Classes */
+th,
+td {
+  text-align: left;
+  padding: 0.8rem;
+}
+
+th {
+  background-color: var(--blue);
+  color: var(--gray);
+  font-weight: var(--font-wt-regular);
+}
+
+tbody tr:nth-child(even) {
+  background-color: var(--soft-blue);
+}
+input[type="radio"] {
+  display: none;
+}
+
+input[type="radio"] + label {
+  cursor: pointer;
+  display: inline-block;
+}
+
+input[type="radio"] + label:before {
+  content: "";
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  margin-right: 0.4rem;
+  border-radius: 50%;
+  border: 1px solid var(--dark-gray);
+}
+
+input[type="radio"]:checked + label:before {
+  background-color: var(--blue);
+  border-color: var(--blue);
+}
+
+/* REUSABLE CLASSES */
+
 .flex-col-center {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
+}
+.flex-col-center-v {
+  display: flex;
+  justify-content: center;
   flex-direction: column;
 }
 .flex-center {
@@ -85,6 +143,7 @@ input {
   display: inline-block;
   cursor: pointer;
   text-transform: capitalize;
+  align-self: flex-start;
 }
 .button:hover {
   opacity: 0.8;
@@ -97,26 +156,20 @@ input {
 .link:active {
   color: var(--dark-blue);
 }
-
-/* Top Nav */
-.top-nav {
-  padding: 2.4rem;
-  gap: 1.8rem;
-  width: 100%;
+.heading-secondary {
+  margin-bottom: 2.4rem;
 }
-.logo {
-  width: 5%;
+.section {
+  padding: 0 4.8rem;
+  min-height: 60vh;
 }
-.logo-img {
-  width: 100%;
-}
-.title {
-  text-transform: uppercase;
-  color: var(--blue);
-  font-size: 2.4rem;
+.error-message {
+  font-size: 1.2rem;
+  color: var(--light-red);
+  margin-top: -1.2rem;
 }
 
-/* Login Form */
+/*************** FORM *********************/
 .form {
   gap: 1.8rem;
 }
@@ -132,12 +185,25 @@ input {
   -o-border-radius: 5px;
   padding: 0.6rem 1.2rem;
 }
-.heading-secondary {
-  margin-bottom: 2.4rem;
-}
-/* Customer Portal */
 
-/* Side Nav */
+/*************** TOP NAV *********************/
+.top-nav {
+  padding: 2.4rem;
+  gap: 1.8rem;
+  width: 100%;
+}
+/* LOGO */
+.logo {
+  width: 5%;
+}
+.logo-img {
+  width: 100%;
+}
+.title {
+  text-transform: uppercase;
+  color: var(--blue);
+  font-size: 2.4rem;
+}
 .nav {
   justify-content: space-between;
   padding: 1.2rem;
@@ -179,29 +245,65 @@ input {
   opacity: 0.85;
 }
 
-/* My Profile */
-.section {
-  padding: 0 4.8rem;
-  min-height: 60vh;
-}
+/******************* CUSTOMER PORTAL *******************/
+
+/******************* PROFILE *******************/
 .section-profile .heading-secondary {
   text-align: center;
 }
-
+.profile-wrapper {
+  padding: 6.4rem 0;
+  margin-bottom: 3.2rem;
+}
 .section-profile .logo {
   width: 40%;
 }
 .profile-card {
   gap: 8.4rem;
 }
-.profile-info {
+.profile-info-wrapper {
   gap: 3.2rem;
+}
+.profile-info {
+  font-weight: var(--font-wt-thin);
+}
+.profile-info span {
+  font-weight: var(--font-wt-regular);
+  margin-left: 0.8rem;
 }
 .account-holder-name {
   font-weight: var(--font-wt-bold);
   font-size: 2.4rem;
+  color: var(--blue);
 }
-/* Reusable Classes */
+.section-transactions {
+  width: 100%;
+  min-height: max-content;
+  margin-bottom: 6.4rem;
+}
+.transactions-none-alert {
+  text-align: center;
+  font-size: 1.8rem;
+  color: var(--blue);
+}
+.amount {
+  font-weight: var(--font-wt-regular);
+}
+.transaction-filters {
+  font-weight: var(--font-wt-thin);
+  margin-bottom: 3.6rem;
+}
+.transaction-type-filters {
+  gap: 2.4rem;
+}
+
+/* REUSABLE CLASSES */
+.text-green {
+  color: var(--green);
+}
+.text-red {
+  color: var(--light-red);
+}
 .hide {
   display: none;
 }
