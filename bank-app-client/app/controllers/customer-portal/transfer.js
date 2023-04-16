@@ -36,8 +36,8 @@ export default class CustomerPortalDepositController extends Controller {
     if (
       this.isUpiIdValid &&
       this.isAmountValid &&
-      upiId != null &&
-      amount != null
+      upiId != '' &&
+      parseInt(amount) > 0
     ) {
       const response = await fetch('http://localhost:8000/transfer', {
         method: 'POST',
@@ -55,6 +55,7 @@ export default class CustomerPortalDepositController extends Controller {
         alert(json.message);
         element.querySelector('.input-amount').value = '';
         element.querySelector('.input-recipient-upiid').value = '';
+        await this.auth.getTransactionTable();
       } else {
         const json = await response.json();
         alert(json.message);
