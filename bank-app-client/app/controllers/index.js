@@ -27,6 +27,7 @@ export default class IndexController extends Controller {
   }
 
   @action async loginCustomer(event) {
+    event.preventDefault();
     console.log(event.target);
     const element = event.target.closest('.form');
     let custId = element.querySelector('.input-cust-id').value;
