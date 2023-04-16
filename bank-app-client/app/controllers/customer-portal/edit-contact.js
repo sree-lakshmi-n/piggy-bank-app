@@ -29,12 +29,12 @@ export default class CustomerPortalEditContactController extends Controller {
     const element = event.target.closest('.form');
     let email = element.querySelector('.input-email ').value;
     let mobilenum = element.querySelector('.input-mobile-num').value;
-    if (email == null && mobilenum == null) {
+    if (email == '' && mobilenum == '') {
       alert('Enter valid values');
     } else if (this.isEmailValid && this.isMobileNumValid) {
-      if (email == null && mobilenum != null) {
+      if (email == '' && mobilenum != '') {
         email = this.auth.get('email');
-      } else if (email != null && mobilenum == null) {
+      } else if (email != '' && mobilenum == '') {
         mobilenum = this.auth.get('phonenum');
       }
       const response = await fetch('http://localhost:8000/update', {
