@@ -2,13 +2,12 @@ import Component from '@glimmer/component';
 import { inject as service } from '@ember/service';
 import { action } from '@ember/object';
 import { tracked } from '@glimmer/tracking';
-import { Evented } from '@ember/object/evented';
 
 export default class TransactionTableComponent extends Component {
   @service('auth') auth;
   @tracked transactions = this.auth.transactions;
-  @tracked entriesnum = 10;
-  transactionTypes = ['All', 'Deposit', 'Withdraw', 'Transfer'];
+  @tracked entriesnum = this.transactions.length;
+  transactionTypes = ['All', 'Deposit', 'Withdrawal', 'Transfer'];
   @tracked fromDate = null;
   @tracked toDate = null;
   @tracked transactionType = 'all';
@@ -54,8 +53,7 @@ export default class TransactionTableComponent extends Component {
         );
       });
     }
-    this.entriesnum =
-      this.transactions.length > 10 ? 10 : this.transactions.length;
+    this.entriesnum = this.transactions.length;
   }
   @action handleToDateFilter(event) {
     this.toDate = event.target.value;
@@ -72,23 +70,28 @@ export default class TransactionTableComponent extends Component {
         );
       });
     }
-    this.entriesnum =
-      this.transactions.length > 10 ? 10 : this.transactions.length;
+    this.entriesnum = this.transactions.length;
   }
 
   @action handleTypeFilter(event) {
-    const transactionType =
+    this.transactionType =
       event.target.nextElementSibling.textContent.toLowerCase();
-    if (transactionType === 'all') {
-      this.transactions = this.auth.transactions;
-    } else {
-      this.transactions = this.auth.transactions.filter(
-        (transaction) => transaction.transactionType === transactionType
-      );
-    }
-    console.log(this.fromDate);
-    console.log(this.toDate);
-    this.entriesnum =
-      this.transactions.length > 10 ? 10 : this.transactions.length;
+    console.log(this.transactionType);
+    this.entriesnum = this.transactions.length;
   }
+  // @action handleTypeFilter(event) {
+  //   const transactionType =
+  //     event.target.nextElementSibling.textContent.toLowerCase();
+  //   if (transactionType === 'all') {
+  //     this.transactions = this.auth.transactions;
+  //   } else {
+  //     this.transactions = this.auth.transactions.filter(
+  //       (transaction) => transaction.transactionType === transactionType
+  //     );
+  //   }
+  //   console.log(this.fromDate);
+  //   console.log(this.toDate);
+  //   this.entriesnum =
+  //     this.transactions.length > 10 ? 10 : this.transactions.length;
+  // }
 }
