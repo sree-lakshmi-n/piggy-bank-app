@@ -12,6 +12,20 @@ export default class AuthService extends Service {
   email = null;
   phonenum = null;
   transactions = null;
+  maxTransactionAmount = 1000000.0;
+
+  getCookie(name) {
+    const cookies = document.cookie.split('; ');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i];
+      if (cookie.startsWith(`${name}=`)) {
+        return cookie.substring(name.length + 1);
+      }
+    }
+    return null;
+  }
+
+  session = this.getCookie('sessionId') || null;
 
   @action async login(custId, password) {
     console.log(custId, password);
@@ -33,6 +47,10 @@ export default class AuthService extends Service {
       this.accountNum = parseInt(json.message.split('+')[1]);
       this.upiId = json.message.split('+')[2];
       console.log(json.message.split('+')[0]);
+      let sessionId = json.message.split('+')[3];
+      let maxAge = json.message.split('+')[5];
+      document.cookie = `sessionId=${sessionId};max-age=${maxAge}; path=/`;
+      this.session = sessionId;
       await this.getCustomerInfo();
       await this.getTransactionTable();
       this.router.transitionTo('customer-portal.profile');
@@ -62,6 +80,8 @@ export default class AuthService extends Service {
       this.email = null;
       this.phonenum = null;
       this.transactions = null;
+      document.cookie = 'sessionId=; max-age=0; path=/';
+      this.session = null;
       this.router.transitionTo('index');
     } else {
       alert('Invalid session');
