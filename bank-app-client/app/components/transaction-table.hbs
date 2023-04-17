@@ -20,7 +20,7 @@
       type="number"
       min="0"
       max="{{this.transactions.length}}"
-      value="{{this.transactions.length}}"
+      value="{{this.entriesnum}}"
       name="entries-num"
       {{on "input" this.handleEntriesNumFilter}}
     /><label for="entries-num">entries</label>
@@ -31,7 +31,7 @@
       type="date"
       name="from-date"
       value={{this.fromDate}}
-      {{on "input" this.handleFromDateFilter}}
+      {{on "change" this.handleFromDateFilter}}
     />
     <label for="to-date">To:</label>
     <input
@@ -56,13 +56,7 @@
     </thead>
     <tbody>
       {{#each this.transactions as |transaction index|}}
-        ***{{this.fromDate}}
         {{#if (lt index this.entriesnum)}}
-          {{#if
-            (or (eq this.fromDate null) (lt this.fromDate transaction.date))
-          }}
-            {{transaction.date}}
-          {{/if}}
           <tr>
             <td>{{transaction.transactionId}}</td>
             <td>{{transaction.transactionType}}</td>
