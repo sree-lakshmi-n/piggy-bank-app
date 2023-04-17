@@ -52,6 +52,9 @@ label,
 input::placeholder {
   font-weight: var(--font-wt-thin);
 }
+label {
+  width: 50%;
+}
 table {
   text-transform: capitalize;
   border-collapse: collapse;
@@ -147,7 +150,8 @@ input[type="radio"]:checked + label:before {
   display: inline-block;
   cursor: pointer;
   text-transform: capitalize;
-  align-self: flex-start;
+  align-self: center;
+  margin-top: 1.2rem;
 }
 .button:hover {
   opacity: 0.8;
@@ -171,6 +175,9 @@ input[type="radio"]:checked + label:before {
   font-size: 1.2rem;
   color: var(--light-red);
   margin-top: -1.2rem;
+}
+.authentication-switch {
+  align-self: center;
 }
 
 /*************** FORM *********************/
@@ -215,6 +222,7 @@ input[type="radio"]:checked + label:before {
 .nav a {
   text-decoration: none;
   color: inherit;
+  padding: 1.2rem 2.4rem;
 }
 
 .nav-list {
@@ -222,10 +230,10 @@ input[type="radio"]:checked + label:before {
   gap: 0.8rem;
 }
 .nav-list-item {
-  padding: 1.2rem 2.4rem;
   cursor: pointer;
   text-transform: capitalize;
   width: max-content;
+  padding: 0.8rem 0rem;
 }
 .nav-list-item:hover,
 .nav-list-item.active-nav {
@@ -237,6 +245,7 @@ input[type="radio"]:checked + label:before {
   background-color: var(--light-red);
   color: var(--light-gray);
   margin: 0 2.4rem 0 3.6rem;
+  padding: 1.2rem 2.4rem;
   border-radius: 8px;
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;
@@ -284,6 +293,9 @@ input[type="radio"]:checked + label:before {
   width: 100%;
   min-height: max-content;
   margin-bottom: 6.4rem;
+}
+.section-transactions label {
+  width: unset;
 }
 .transactions-none-alert {
   text-align: center;
