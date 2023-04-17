@@ -5,12 +5,10 @@ import DatabaseConnection.*
 
 object DatabaseCustomer:
   def registerCustomer(connection: Connection, name: String, email: String, password: String, phone_number: String, upi_id: String): Boolean =
-    if (checkCustomerExists(connection, phone_number, email) && checkUpiExists(connection, upi_id)) then
-      println("check false")
+    if (checkCustomerExists(connection, phone_number, email) || checkUpiExists(connection, upi_id)) then
       false
     else
       addCustomer(connection, name, email, password, phone_number, upi_id)
-      println("check true")
       true
 
   def isColValueUnique(connection: Connection, custId: Int, column: String, colValue: String): Boolean =
@@ -107,7 +105,7 @@ object DatabaseCustomer:
     stmt.close()
   }
 
-  def loginCustomer(connection: Connection, custId: Int, password: String): Boolean =
+  def loginCustomer(connection: Connection, custId: Int, password: String): (Boolean, String) =
     var query = "select * from customer where cust_id=? and password=?"
     var stmt = connection.prepareStatement(query)
     stmt.setInt(1, custId)
@@ -121,9 +119,9 @@ object DatabaseCustomer:
       stmt.setInt(2, custId)
       val rowsAffected = stmt.executeUpdate()
       println(s"Inserted $rowsAffected row(s) into session")
-      true
+      (true, sessionId)
     else
-      false
+      (false, "")
 
   def isCustIdValid(connection: Connection, custId: Int): Boolean =
     val query = "select * from customer where cust_id=?";
@@ -156,5 +154,5 @@ object DatabaseCustomer:
     if (rs.next()) then
       rs.getInt("cust_id")
     else
-      -1  
+      -1
 
