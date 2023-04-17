@@ -3,7 +3,14 @@ package database
 import java.sql.{Connection, PreparedStatement, ResultSet}
 import DatabaseConnection.*
 
+import java.time.{Duration, Instant}
+
+case class Session(sessionId: String, custId: Int, var lastAccessTime: Instant)
+
+
 object DatabaseCustomer:
+  val sessionTimeout = Duration.ofMinutes(15)
+
   def registerCustomer(connection: Connection, name: String, email: String, password: String, phone_number: String, upi_id: String): Boolean =
     if (checkCustomerExists(connection, phone_number, email) || checkUpiExists(connection, upi_id)) then
       false
@@ -105,23 +112,27 @@ object DatabaseCustomer:
     stmt.close()
   }
 
-  def loginCustomer(connection: Connection, custId: Int, password: String): (Boolean, String) =
+  def loginCustomer(connection: Connection, custId: Int, password: String): (Boolean, Session) =
     var query = "select * from customer where cust_id=? and password=?"
     var stmt = connection.prepareStatement(query)
     stmt.setInt(1, custId)
     stmt.setString(2, password)
     val rs: ResultSet = stmt.executeQuery()
     if (rs.next()) then
-      query = "insert into session values(?,?)"
+      query = "insert into session values(?,?,?)"
       stmt = connection.prepareStatement(query)
       val sessionId = java.util.UUID.randomUUID.toString
+      val session = Session(sessionId, custId, Instant.now())
       stmt.setString(1, sessionId)
       stmt.setInt(2, custId)
+      stmt.setTimestamp(3, java.sql.Timestamp.from(session.lastAccessTime))
       val rowsAffected = stmt.executeUpdate()
       println(s"Inserted $rowsAffected row(s) into session")
-      (true, sessionId)
+      println(session)
+      println(session.toString)
+      (true, session)
     else
-      (false, "")
+      (false, null)
 
   def isCustIdValid(connection: Connection, custId: Int): Boolean =
     val query = "select * from customer where cust_id=?";
