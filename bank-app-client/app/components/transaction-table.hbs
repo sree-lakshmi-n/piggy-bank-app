@@ -14,17 +14,17 @@
       </div>
     {{/each}}
   </div>
-  <div class="transaction-entries-num-filter flex-center-v">
+  {{!-- <div class="transaction-entries-num-filter flex-center-v">
     <span>Show</span>
     <input
       type="number"
       min="0"
       max="{{this.transactions.length}}"
-      value="{{this.entriesnum}}"
+      value="{{this.transactions.length}}"
       name="entries-num"
       {{on "input" this.handleEntriesNumFilter}}
     /><label for="entries-num">entries</label>
-  </div>
+  </div> --}}
   <div class="transaction-date-filter flex-center-v">
     <label for="from-date">From:</label>
     <input
@@ -57,31 +57,38 @@
     <tbody>
       {{#each this.transactions as |transaction index|}}
         {{#if (lt index this.entriesnum)}}
-          <tr>
-            <td>{{transaction.transactionId}}</td>
-            <td>{{transaction.transactionType}}</td>
-            <td>{{transaction.date}}</td>
-            <td>{{transaction.accountNum}}</td>
-            <td>
-              {{#if (gt transaction.recipientAccountNum 0)}}
-                {{transaction.recipientAccountNum}}
-              {{else}}
-                -
-              {{/if}}
-            </td>
-            <td
-              class="amount
-                {{if
-                  (eq transaction.transactionType 'deposit')
-                  'text-green'
-                  (if
-                    (eq transaction.recipientAccountNum this.auth.accountNum)
+          {{#if
+            (or
+              (eq this.transactionType "all")
+              (eq this.transactionType transaction.transactionType)
+            )
+          }}
+            <tr>
+              <td>{{transaction.transactionId}}</td>
+              <td>{{transaction.transactionType}}</td>
+              <td>{{transaction.date}}</td>
+              <td>{{transaction.accountNum}}</td>
+              <td>
+                {{#if (gt transaction.recipientAccountNum 0)}}
+                  {{transaction.recipientAccountNum}}
+                {{else}}
+                  -
+                {{/if}}
+              </td>
+              <td
+                class="amount
+                  {{if
+                    (eq transaction.transactionType 'deposit')
                     'text-green'
-                    'text-red'
-                  )
-                }}"
-            >{{transaction.amount}}</td>
-          </tr>
+                    (if
+                      (eq transaction.recipientAccountNum this.auth.accountNum)
+                      'text-green'
+                      'text-red'
+                    )
+                  }}"
+              >{{transaction.amount}}</td>
+            </tr>
+          {{/if}}
         {{/if}}
       {{/each}}
     </tbody>
