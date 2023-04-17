@@ -37,7 +37,8 @@ export default class CustomerPortalDepositController extends Controller {
       this.isUpiIdValid &&
       this.isAmountValid &&
       upiId != '' &&
-      parseInt(amount) > 0
+      parseInt(amount) > 0 &&
+      parseInt(amount) <= this.auth.maxTransactionAmount
     ) {
       const response = await fetch('http://localhost:8000/transfer', {
         method: 'POST',
@@ -60,6 +61,10 @@ export default class CustomerPortalDepositController extends Controller {
         const json = await response.json();
         alert(json.message);
       }
+    } else if (parseInt(amount) > this.auth.maxTransactionAmount) {
+      alert(
+        `Amount entered is large. Amount should be atmost ${this.auth.maxTransactionLimit}`
+      );
     } else {
       alert('Enter valid details');
     }

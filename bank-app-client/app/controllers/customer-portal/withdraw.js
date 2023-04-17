@@ -27,7 +27,11 @@ export default class CustomerPortalDepositController extends Controller {
     const element = event.target.closest('.form');
     let amount = element.querySelector('.input-amount').value;
     console.log(`${custId} ${amount} ${accountNum}`);
-    if (this.isAmountValid && parseInt(amount) > 0) {
+    if (
+      this.isAmountValid &&
+      parseInt(amount) > 0 &&
+      parseInt(amount) <= this.auth.maxTransactionAmount
+    ) {
       const response = await fetch('http://localhost:8000/withdraw', {
         method: 'POST',
         headers: {
@@ -47,6 +51,10 @@ export default class CustomerPortalDepositController extends Controller {
         const json = await response.json();
         alert(json.message);
       }
+    } else if (parseInt(amount) > this.auth.maxTransactionAmount) {
+      alert(
+        `Amount entered is large. Amount should be atmost ${this.auth.maxTransactionLimit}`
+      );
     } else {
       alert('Enter valid data');
     }
