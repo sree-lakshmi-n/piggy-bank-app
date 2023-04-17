@@ -15,15 +15,18 @@ import database.DatabaseCustomer.*
 import database.DatabaseAccount.*
 import DatabaseConnection.*
 
-import java.net._
-import java.io._
-import scala.io._
+import java.net.*
+import java.io.*
+import scala.io.*
+import io.circe.generic.auto.*
+import io.circe.syntax.*
 
-import io.circe.generic.auto._
-import io.circe.syntax._
+import java.time.Instant
 
 
 case class ResponseObject(code: Int, message: String)
+
+case class Session(sessionId: String, custId: Int, var lastAccessTime: Instant)
 
 object RestApi:
   def main(args: Array[String]): Unit =
@@ -73,18 +76,14 @@ case class RegisterHandler(connection: Connection) extends HttpHandler :
       println(s"$name $email $password $phone_number $upi_id")
       if (registerCustomer(connection, name, email, password, phone_number, upi_id)) then
         response = "Registered Successfully"
-        println(response)
         code = 200
       else
-        println("422")
         response = "A customer with this email id or mobile number or upi id already exists. Try logging in"
-        println(response)
         code = 422
     else
       response = "Method not allowed"
       code = 405
     val responseObject = ResponseObject(code, response)
-    println(responseObject)
     val json = responseObject.asJson.toString()
     t.getResponseHeaders().add("Content-Type", "application/json; charset=UTF-8")
     t.sendResponseHeaders(code, json.getBytes(StandardCharsets.UTF_8).length)
@@ -134,7 +133,6 @@ case class CustomerInfoHandler(connection: Connection) extends HttpHandler :
     if t.getRequestMethod == "POST" then
       val headers = t.getRequestHeaders.asScala.toMap
       val cust_id = Integer.parseInt(headers.get("Custid").flatMap(_.asScala.headOption).get)
-      println(getCustomerDetails(connection, cust_id))
       val (name, email, mobile_num) = getCustomerDetails(connection, cust_id)
       response = s"name:$name,email:$email,mobile_num:$mobile_num"
       code = 200
@@ -164,11 +162,11 @@ case class LoginHandler(connection: Connection) extends HttpHandler :
       val headers = t.getRequestHeaders.asScala.toMap
       val custId = Integer.parseInt(headers.get("Custid").flatMap(_.asScala.headOption).get)
       val password = headers.get("Password").flatMap(_.asScala.headOption).get
-      val (isCustomerFound, sessionId) = loginCustomer(connection, custId, password)
+      val (isCustomerFound, session) = loginCustomer(connection, custId, password)
       if (isCustomerFound) then
         val accountNumber = getAccountNumFromCustId(connection, custId)
         val upiid = getUpiId(connection, accountNumber)
-        response = s"Login successful!+$accountNumber+$upiid+$sessionId"
+        response = s"Login successful!+$accountNumber+$upiid+${session.sessionId}+${session.custId}+${session.lastAccessTime}"
         code = 200
       else
         response = "No such customer found"
@@ -386,16 +384,18 @@ case class CustIdHandler(connection: Connection) extends HttpHandler :
     val httpMethod = t.getRequestMethod()
     if (httpMethod.equalsIgnoreCase("OPTIONS")) then
       t.getResponseHeaders().set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
-      t.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type, Authorization,sessionId")
+      t.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type, Authorization,sessionid")
       t.sendResponseHeaders(200, -1)
     if t.getRequestMethod == "POST" then
       val headers = t.getRequestHeaders.asScala.toMap
       val sessionId = (headers.get("Sessionid").flatMap(_.asScala.headOption).get)
       val custId = getCustId(connection, sessionId)
       val accountNum = getAccountNumFromCustId(connection, custId)
+      val upiid = getUpiId(connection, accountNum)
       if (custId >= 0) then
         code = 200
-        response = s"$custId+$accountNum"
+        response = s"$custId+$accountNum+$upiid"
+        println(response)
       else
         code = 422
         response = "Not found"
@@ -425,7 +425,6 @@ case class TransactionTableHandler(connection: Connection) extends HttpHandler :
     val accountNum = Integer.parseInt(headers.get("Accountnum").flatMap(_.asScala.headOption).get)
     val response = getTransactionTable(connection, accountNum)
     code = 200
-    println(response)
     val responseObject = ResponseObject(code, response.toString())
     val json = responseObject.asJson.toString()
     t.getResponseHeaders().add("Content-Type", "application/json; charset=UTF-8")
