@@ -8,7 +8,6 @@ import DatabaseConnection.*
 object DatabaseAccount:
   val maxTransactionLimit: Double = 150000.0
 
-
   def checkBalance(connection: Connection, account_num: Int): Double =
     val query = "select * from account where account_num=?"
     val stmt: PreparedStatement = connection.prepareStatement(query)
