@@ -73,15 +73,18 @@ case class RegisterHandler(connection: Connection) extends HttpHandler :
       println(s"$name $email $password $phone_number $upi_id")
       if (registerCustomer(connection, name, email, password, phone_number, upi_id)) then
         response = "Registered Successfully"
+        println(response)
         code = 200
       else
         println("422")
         response = "A customer with this email id or mobile number or upi id already exists. Try logging in"
+        println(response)
         code = 422
     else
       response = "Method not allowed"
       code = 405
     val responseObject = ResponseObject(code, response)
+    println(responseObject)
     val json = responseObject.asJson.toString()
     t.getResponseHeaders().add("Content-Type", "application/json; charset=UTF-8")
     t.sendResponseHeaders(code, json.getBytes(StandardCharsets.UTF_8).length)
@@ -161,10 +164,11 @@ case class LoginHandler(connection: Connection) extends HttpHandler :
       val headers = t.getRequestHeaders.asScala.toMap
       val custId = Integer.parseInt(headers.get("Custid").flatMap(_.asScala.headOption).get)
       val password = headers.get("Password").flatMap(_.asScala.headOption).get
-      if (loginCustomer(connection, custId, password)) then
+      val (isCustomerFound, sessionId) = loginCustomer(connection, custId, password)
+      if (isCustomerFound) then
         val accountNumber = getAccountNumFromCustId(connection, custId)
         val upiid = getUpiId(connection, accountNumber)
-        response = s"Login successful!+$accountNumber+$upiid"
+        response = s"Login successful!+$accountNumber+$upiid+$sessionId"
         code = 200
       else
         response = "No such customer found"
@@ -378,13 +382,20 @@ case class CustIdHandler(connection: Connection) extends HttpHandler :
   def handle(t: HttpExchange): Unit =
     var response = ""
     var code = 400
+    t.getResponseHeaders().set("Access-Control-Allow-Origin", "*")
+    val httpMethod = t.getRequestMethod()
+    if (httpMethod.equalsIgnoreCase("OPTIONS")) then
+      t.getResponseHeaders().set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, DELETE")
+      t.getResponseHeaders().set("Access-Control-Allow-Headers", "Content-Type, Authorization,sessionId")
+      t.sendResponseHeaders(200, -1)
     if t.getRequestMethod == "POST" then
       val headers = t.getRequestHeaders.asScala.toMap
       val sessionId = (headers.get("Sessionid").flatMap(_.asScala.headOption).get)
       val custId = getCustId(connection, sessionId)
+      val accountNum = getAccountNumFromCustId(connection, custId)
       if (custId >= 0) then
         code = 200
-        response = custId.toString
+        response = s"$custId+$accountNum"
       else
         code = 422
         response = "Not found"
