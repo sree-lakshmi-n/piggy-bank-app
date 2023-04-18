@@ -1,37 +1,3 @@
 <section class="section section-transfer flex-center-h">
-  <div class="form flex-col-center-v">
-    <h2 class="heading-secondary">Transfer</h2>
-    <div class="form-input flex-center-v">
-      <label for="recipient-upiid">Recipient UPI ID</label>
-      <input
-        type="text"
-        name="recipient-upiid"
-        class="input-recipient-upiid"
-        {{on "input" (fn this.validateFormElements "upiId")}}
-        required
-      />
-    </div>
-    {{#if (eq this.isUpiIdValid false)}}
-      <span class="error-message">Invalid UPI ID. UPI should always end with
-        @okpiggybank</span>
-    {{/if}}
-    <div class="form-input flex-center-v">
-      <label for="amount">Amount</label>
-      <input
-        type="text"
-        name="amount"
-        class="input-amount"
-        {{on "input" (fn this.validateFormElements "amount")}}
-        required
-      />
-    </div>
-    {{#if (eq this.isAmountValid false)}}
-      <span class="error-message">Enter valid amount</span>
-    {{/if}}
-    <button
-      type="button"
-      class="button"
-      {{on "click" this.transferAmount}}
-    >Transfer</button>
-  </div>
+  <CustomerForms::TransferForm />
 </section>
