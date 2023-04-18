@@ -53,7 +53,7 @@ export default class CustomerPortalDepositController extends Controller {
       }
     } else if (parseInt(amount) > this.auth.maxTransactionAmount) {
       alert(
-        `Amount entered is large. Amount should be atmost ${this.auth.maxTransactionLimit}`
+        `Amount entered is large. Amount should be atmost ${this.auth.maxTransactionAmount}`
       );
     } else {
       alert('Enter valid data');
