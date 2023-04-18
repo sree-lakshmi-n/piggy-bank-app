@@ -1,9 +1,9 @@
-import Controller from '@ember/controller';
+import Component from '@glimmer/component';
 import { action } from '@ember/object';
 import { inject as service } from '@ember/service';
 import { tracked } from '@glimmer/tracking';
 
-export default class CustomerPortalDepositController extends Controller {
+export default class CustomerFormsWithdrawFormComponent extends Component {
   @service('auth') auth;
   @service router;
   @service('regex-check') regex;
@@ -21,6 +21,7 @@ export default class CustomerPortalDepositController extends Controller {
   }
 
   @action async withdrawAmount(event) {
+    event.preventDefault();
     const custId = this.auth.get('currentCustId');
     const accountNum = this.auth.get('accountNum');
     console.log(event.target);
